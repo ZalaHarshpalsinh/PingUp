@@ -1,6 +1,6 @@
 # pingup
 
-A WhatsApp like chat application
+A new Flutter project.
 
 ## Getting Started
 
