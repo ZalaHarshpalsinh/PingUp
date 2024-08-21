@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:pingup/Widgets/index.dart';
 
 class ChatListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    
+
     final List<Map<String, String>> contacts = [
-      {'name': 'abc', 'profile': '../../assets/profile1.png'},
-      {'name': 'abc', 'profile': '../../assets/profile1.png'},
-      {'name': 'abc', 'profile': '../../assets/profile1.png'},
+      {'name': 'abc', 'profile': '../assets/profile1.png'},
+      {'name': 'abc', 'profile': '../assets/profile1.png'},
+      {'name': 'abc', 'profile': '../assets/profile1.png'},
     ];
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Contacts'),
+        title: const Text('Contacts'),
       ),
       body: ListView.builder(
         itemCount: contacts.length,
@@ -23,7 +24,12 @@ class ChatListPage extends StatelessWidget {
             ),
             title: Text(contacts[index]['name']!),
             onTap: () {
-              Navigator.pushNamed(context, '/chat', arguments: contacts[index]);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChatPage(name : contacts[index]['name']! ),
+                ),
+              );
             },
           );
         },

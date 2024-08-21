@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 
-class ChatPage extends StatefulWidget {
+class ChatPage extends StatefulWidget
+{
+  final String name;
+  const ChatPage({super.key, required this.name});
+
   @override
-  _ChatPageState createState() => _ChatPageState();
+  State<ChatPage> createState() => _ChatPageState();
 }
+
+
 
 class _ChatPageState extends State<ChatPage> {
   final List<Map<String, dynamic>> messages = [
@@ -23,11 +29,10 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    final Map<String, String> contact = ModalRoute.of(context)!.settings.arguments as Map<String, String>;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(contact['name']!),
+        title: Text(widget.name),
       ),
       body: Column(
         children: [
