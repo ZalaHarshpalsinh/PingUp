@@ -1,24 +1,21 @@
 import 'package:flutter/material.dart';
-import 'chat_list_page.dart';
-import 'chat_page.dart';
+import 'package:pingup/Widgets/index.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(PingUp());
 }
 
-class MyApp extends StatelessWidget {
+class PingUp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'PingUp',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+        useMaterial3: true,
       ),
-      initialRoute: '/',
-      routes: {
-        '/': (context) => ChatListPage(),
-        '/chat': (context) => ChatPage(),
-      },
+      home: const MainPage(),
     );
   }
 }
