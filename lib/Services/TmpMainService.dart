@@ -5,7 +5,7 @@ import 'dart:convert';
 
 class TmpMainService implements MainService
 {
-  final String baseUrl = "http://localhost:5000";
+  final String baseUrl = "http://192.168.1.14:5000";
 
   @override
   Future<List<Map<String, dynamic>>> getChatList(String userId) async
@@ -48,7 +48,7 @@ class TmpMainService implements MainService
   }
 
   @override
-  void sendMessage(String senderId, String receiverId, String message) async {
+  Future<void> sendMessage(String senderId, String receiverId, String message) async {
     final response = await http.post(
         Uri.parse("$baseUrl/message"),
         headers: {'Content-Type': 'application/json'},
