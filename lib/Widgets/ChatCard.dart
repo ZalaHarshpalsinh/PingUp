@@ -27,7 +27,7 @@ class ChatCard extends StatelessWidget
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => TestChatPage(personId: friendId, personName:  name ),
+            builder: (context) => ChatPage(personId: friendId, personName:  name ),
           ),
         );
       },

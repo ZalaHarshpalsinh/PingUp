@@ -1,80 +1,109 @@
 import 'package:flutter/material.dart';
+import 'package:pingup/Services/index.dart';
+import '../global.dart';
 
 class ChatPage extends StatefulWidget
 {
-  final String name;
-  const ChatPage({super.key, required this.name});
+  final String personName;
+  final String personId;
+  final MainService mainService = MainServiceImpl();
+  ChatPage({super.key, required this.personId, required this.personName});
 
   @override
-  State<ChatPage> createState() => _ChatPageState();
+  State<ChatPage> createState() => _TestChatPageState();
 }
 
 
 
-class _ChatPageState extends State<ChatPage> {
-  final List<Map<String, dynamic>> messages = [
-    {'text': 'Hello!', 'isSentByMe': true},
-    {'text': 'Hi! How are you?', 'isSentByMe': false},
-    {'text': 'I am fine, thanks!', 'isSentByMe': true},
-  ];
+class _TestChatPageState extends State<ChatPage> {
+  List<Map<String, dynamic>> messages = [];
 
   final TextEditingController _controller = TextEditingController();
 
-  void _sendMessage(String text) {
-    setState(() {
-      messages.add({'text': text, 'isSentByMe': true});
+  @override
+  void initState() {
+    super.initState();
+    _fetchMessages();
+  }
+
+  void _fetchMessages() async {
+    List<Map<String, dynamic>> fetchedMessages = await widget.mainService.getMessages(userId, widget.personId);
+    setState((){
+      messages = fetchedMessages;
     });
-    _controller.clear();
+  }
+
+  void _sendMessage() async {
+    if (_controller.text.isNotEmpty) {
+      await widget.mainService.sendMessage(userId, widget.personId, _controller.text);
+      _fetchMessages();
+      _controller.clear();
+    }
+  }
+
+  Widget _buildMessageBubble(String text, bool isSentByMe) {
+    return Align(
+      alignment: isSentByMe ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 8),
+        constraints: const BoxConstraints(maxWidth: 250),
+        decoration: BoxDecoration(
+          color: isSentByMe ? Colors.green[200] : Colors.grey[300],
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          text,
+          style: const TextStyle(fontSize: 16),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.name),
+        title: Text(widget.personName),
       ),
       body: Column(
         children: [
           Expanded(
             child: ListView.builder(
+              reverse: true,
               itemCount: messages.length,
               itemBuilder: (context, index) {
-                return Align(
-                  alignment: messages[index]['isSentByMe'] ? Alignment.centerRight : Alignment.centerLeft,
-                  child: Container(
-                    padding: EdgeInsets.all(10),
-                    margin: EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      color: messages[index]['isSentByMe'] ? Colors.blue[100] : Colors.grey[300],
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(messages[index]['text']!),
-                  ),
+                final message = messages[messages.length - index - 1];
+                return _buildMessageBubble(
+                  message['message'],
+                  message['sender']==userId,
                 );
               },
             ),
           ),
           Padding(
-            padding: EdgeInsets.all(8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
             child: Row(
               children: [
                 Expanded(
                   child: TextField(
                     controller: _controller,
                     decoration: InputDecoration(
-                      hintText: 'Type a message',
-                      border: OutlineInputBorder(),
+                      hintText: "Type a message",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
                     ),
                   ),
                 ),
-                IconButton(
-                  icon: Icon(Icons.send),
-                  onPressed: () {
-                    if (_controller.text.trim().isNotEmpty) {
-                      _sendMessage(_controller.text.trim());
-                    }
-                  },
+                const SizedBox(width: 8),
+                FloatingActionButton(
+                  onPressed: _sendMessage,
+                  child: const Icon(Icons.send),
                 ),
               ],
             ),
