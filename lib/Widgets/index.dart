@@ -4,5 +4,6 @@ export 'MainBody.dart';
 export 'ChatPage.dart';
 export 'ChatListPage.dart';
 export 'ChatCard.dart';
-export 'TestChatListPage.dart';
-export 'TestChatPage.dart';
+export 'Auth.dart';
+export 'LoginPage.dart';
+export 'Register.dart';

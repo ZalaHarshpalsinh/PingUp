@@ -1,37 +1,38 @@
 import 'package:flutter/material.dart';
-import 'package:pingup/Widgets/index.dart';
+import '../Widgets/index.dart';
+import '../Services/index.dart';
+import '../global.dart';
 
-class ChatListPage extends StatelessWidget {
+class ChatListPage extends StatelessWidget
+{
+  final MainService mainService = MainServiceImpl();
+
   @override
   Widget build(BuildContext context) {
 
-    final List<Map<String, String>> contacts = [
-      {'name': 'abc', 'profile': '../assets/profile1.png'},
-      {'name': 'abc', 'profile': '../assets/profile1.png'},
-      {'name': 'abc', 'profile': '../assets/profile1.png'},
-    ];
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Contacts'),
+        title: const Text('Chats'),
       ),
-      body: ListView.builder(
-        itemCount: contacts.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            leading: CircleAvatar(
-              backgroundImage: AssetImage(contacts[index]['profile']!),
-            ),
-            title: Text(contacts[index]['name']!),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ChatPage(name : contacts[index]['name']! ),
-                ),
-              );
-            },
-          );
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: mainService.getChatList(userId),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('No chats available.'));
+          } else {
+            final chatList = snapshot.data!;
+            return ListView.builder(
+              itemCount: chatList.length,
+              itemBuilder: (context, index) {
+                final chat = chatList[index];
+                return ChatCard(friendId: chat['_id'], name: chat['name'], email: chat["email"], profilePhotoUrl: chat['profilePhotoUrl']);
+              },
+            );
+          }
         },
       ),
     );

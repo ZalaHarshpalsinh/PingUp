@@ -11,8 +11,9 @@ class MainBody extends StatelessWidget
     return TabBarView(
         controller: tabController,
         children: [
-          TestChatListPage(),
-          const Text("Groups")],
+          ChatListPage(),
+          const Text("Groups")
+        ],
     );
   }
 }
