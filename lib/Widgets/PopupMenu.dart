@@ -12,6 +12,7 @@ class PopupMenu extends StatefulWidget {
 class _PopupMenuState extends State<PopupMenu> {
 
   final FlutterSecureStorage _storage = FlutterSecureStorage();
+
   Future<void> logout(BuildContext context) async
   {
     await _storage.delete(key: 'jwt');
@@ -22,9 +23,17 @@ class _PopupMenuState extends State<PopupMenu> {
     );
   }
 
+  Future<void> loadProfilePage(BuildContext context) async
+  {
+    String? userId = await  _storage.read(key: 'userId');
+    Navigator.of(context).push(MaterialPageRoute(builder: (context){
+      return UserProfilePage(userId: userId!);
+    }));
+  }
+
   Map<String, VoidCallback> _menuOptions(BuildContext context) {
     return {
-      'Profile': () => {},
+      'Profile': () => loadProfilePage(context),
       'Logout': () => logout(context),
     };
   }

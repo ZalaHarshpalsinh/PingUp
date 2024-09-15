@@ -106,4 +106,13 @@ class MainServiceImpl implements MainService {
 
     return json.decode(response.body);
   }
+
+  @override
+  Future<Map<String, dynamic>> getUserProfile(String jwt, String userId) async {
+    final response = await http.get(
+        Uri.parse("$baseUrl/users/$userId"),
+        headers: { 'Authorization': 'Bearer $jwt'}
+    );
+    return json.decode(response.body);
+  }
 }
