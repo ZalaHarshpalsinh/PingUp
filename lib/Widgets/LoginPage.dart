@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import './index.dart';
 import '../Services/index.dart';
+import '../models/index.dart';
+import 'dart:convert';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -33,8 +35,10 @@ class _LoginPageState extends State<LoginPage> {
     if(response['success'])
     {
       final String jwt = response['data']['accessToken'];
+      final String userId = response['data']['user']['_id'];
       await secureStorage.write(key: 'jwt', value: jwt);
-      print(jwt);
+      await secureStorage.write(key: 'userId', value: userId);
+      //print(jwt);
       Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context){
           return Auth();
         })

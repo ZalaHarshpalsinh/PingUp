@@ -1,11 +1,11 @@
 import './MainService.dart';
+import '../global.dart';
 import 'package:http/http.dart' as http;
 import 'dart:io';
 import 'dart:convert';
 
 
 class MainServiceImpl implements MainService {
-  final String baseUrl = "http://192.168.1.14:3000";
 
   @override
   Future<List<Map<String, dynamic>>> getChatList(String userId) async {
@@ -46,8 +46,7 @@ class MainServiceImpl implements MainService {
   }
 
   @override
-  Future<void> sendMessage(String senderId, String receiverId,
-      String message) async {
+  Future<void> sendMessage(String senderId, String receiverId, String message) async {
     final response = await http.post(
         Uri.parse("$baseUrl/message"),
         headers: {'Content-Type': 'application/json'},
@@ -105,6 +104,15 @@ class MainServiceImpl implements MainService {
           'password': password,
         }));
 
+    return json.decode(response.body);
+  }
+
+  @override
+  Future<Map<String, dynamic>> getUserProfile(String jwt, String userId) async {
+    final response = await http.get(
+        Uri.parse("$baseUrl/users/$userId"),
+        headers: { 'Authorization': 'Bearer $jwt'}
+    );
     return json.decode(response.body);
   }
 }

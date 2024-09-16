@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../Widgets/index.dart';
 
 class MainAppBar extends StatelessWidget implements PreferredSizeWidget
 {
@@ -16,7 +17,7 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget
       backgroundColor: Theme.of(context).primaryColor,
       actions: [
         IconButton(icon: const Icon(Icons.search), onPressed: (){}, color: Colors.white,),
-        IconButton(icon: const Icon(Icons.more_vert), onPressed: (){}, color: Colors.white,),
+        PopupMenu(),
       ],
       bottom: TabBar(
         labelColor: Colors.white,
