@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pingup/Widgets/UserSearchPage.dart';
 import 'package:pingup/Widgets/index.dart';
 
 class MainPage extends StatefulWidget {
@@ -24,6 +25,16 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
     return Scaffold(
         appBar: MainAppBar(tabController: _tabController),
         body: MainBody(tabController: _tabController),
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: Theme.of(context).primaryColor, // WhatsApp-like color
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const UserSearchPage()),
+            );
+          },
+          child: const Icon(Icons.message, color: Colors.white), // WhatsApp-like icon
+        ),
     );
   }
 }

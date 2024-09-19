@@ -115,4 +115,29 @@ class MainServiceImpl implements MainService {
     );
     return json.decode(response.body);
   }
+
+  @override
+  Future<Map<String, dynamic>> searchUsers(String jwt, String searchText) async {
+    final response = await http.get(Uri.parse("$baseUrl/availableUsers?q=$searchText"),
+        headers: { 'Authorization': 'Bearer $jwt'}
+    );
+
+    return json.decode(response.body);
+  }
+
+  @override
+  Future<Map<String, dynamic>> createChat(String jwt, String userId) async
+  {
+      final response = await http.post(
+          Uri.parse("$baseUrl/createChat"),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $jwt',
+          },
+          body: json.encode({
+            "withUserId": userId
+          })
+      );
+      return json.decode(response.body);
+  }
 }
