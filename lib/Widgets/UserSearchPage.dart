@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/index.dart';
 import '../Services/index.dart';
+import '../Widgets/index.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class UserSearchPage extends StatefulWidget {
@@ -47,7 +48,7 @@ class _UserSearchPageState extends State<UserSearchPage>
       if (response['success'])
       {
         List<dynamic> data = response['data'];
-        //print(data);
+        print(data);
         setState(() {
           users = data.map((json) => User.fromJson(json)).toList();
           isLoading = false;
@@ -58,7 +59,7 @@ class _UserSearchPageState extends State<UserSearchPage>
       {
         setState(() {
           hasError = true;
-          //print("error from server");
+          print("error from server");
           isLoading = false;
         });
       }
@@ -103,32 +104,7 @@ class _UserSearchPageState extends State<UserSearchPage>
     }
   }
 
-  void _showCreateChatDialog(User user) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Create Chat with ${user.name}"),
-          content: const Text("Do you want to create a chat?"),
-          actions: <Widget>[
-            TextButton(
-              child: const Text("No"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text("Yes"),
-              onPressed: () {
-                _createChat(user);
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -160,27 +136,12 @@ class _UserSearchPageState extends State<UserSearchPage>
           : hasError
           ? const Center(child: Text('Failed to load users.'))
           : ListView.builder(
-        itemCount: users.length,
-        itemBuilder: (context, index) {
-          User user = users[index];
-          return ListTile(
-            leading: CircleAvatar(
-              backgroundImage: NetworkImage(user.profilePhoto),
-            ),
-            title: Text(user.name),
-            trailing: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).primaryColor, // WhatsApp-like color for the button
-              ),
-              onPressed: () => _showCreateChatDialog(user),
-              child: const Text(
-                "Create Chat",
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          );
-        },
-      ),
+            itemCount: users.length,
+            itemBuilder: (context, index) {
+              User user = users[index];
+              return CreateChatCard(user: user, onCreateChat: _createChat);
+            },
+          ),
     );
   }
 }

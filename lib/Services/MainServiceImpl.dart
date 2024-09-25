@@ -71,6 +71,17 @@ class MainServiceImpl implements MainService {
   }
 
   @override
+  Future<Map<String, dynamic>> setStatusOffline(String jwt) async
+  {
+    final response = await http.post(
+        Uri.parse("$baseUrl/setStatusOffline"),
+        headers: { 'Authorization': 'Bearer $jwt'}
+    );
+
+    return json.decode(response.body);
+  }
+
+  @override
   Future<Map<String, dynamic>> registerUser (String name, String email, String password, File? profilePhoto) async
   {
     var request = http.MultipartRequest(

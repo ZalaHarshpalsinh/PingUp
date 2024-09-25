@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:pingup/Widgets/UserProfile.dart';
-import '../Services/index.dart';
-import '../models/index.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
-import '../global.dart';
+import 'package:pingup/Services/index.dart';
+import 'package:pingup/Widgets/index.dart';
+import 'package:pingup/models/index.dart';
+import 'package:pingup/global.dart';
+
 
 class UserProfilePage extends StatefulWidget
 {
@@ -18,10 +19,10 @@ class UserProfilePage extends StatefulWidget
 
 class _UserProfilePageState extends State<UserProfilePage>
 {
-  final MainService mainService = MainServiceImpl();
-  final FlutterSecureStorage _storage = FlutterSecureStorage();
+  final MainService mainService = getIt<MainService>();
+  final FlutterSecureStorage _storage = getIt<FlutterSecureStorage>();
+  final WebSocketService webSocketService = getIt<WebSocketService>();
   User? _user;
-  IO.Socket? _socket;
 
   @override
   void initState() {
@@ -32,7 +33,6 @@ class _UserProfilePageState extends State<UserProfilePage>
 
   @override
   void dispose() {
-    _socket?.disconnect();
     super.dispose();
   }
 
@@ -60,30 +60,20 @@ class _UserProfilePageState extends State<UserProfilePage>
 
   // Setup WebSocket connection and listen for "Profile Update" events
   void _setupWebSocket() {
-    _socket = IO.io(baseUrl, <String, dynamic>{
-      'transports': ['websocket'],
-      'autoConnect': false,
-    });
-
-    _socket?.connect();
-
-    _socket?.onConnect((_) {
-      print('WebSocket connected');
-    });
-
     // Listen for 'Profile Update' event
-    _socket?.on('Profile Update:${widget.userId}', (data)
+    webSocketService.socket!.on('Profile Update', (data)
     {
+      print("Profile update ${data['name']}");
       User tmp = User.fromJson(data);
-      if (tmp.id == widget.userId) {
-        setState(() {
-          _user = tmp;
-        });
+      if (tmp.id == widget.userId)
+      {
+        if(mounted)
+          {
+            setState(() {
+              _user = tmp;
+            });
+          }
       }
-    });
-
-    _socket?.onDisconnect((_) {
-      print('WebSocket disconnected');
     });
   }
 
