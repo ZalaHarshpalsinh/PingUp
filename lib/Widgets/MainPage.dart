@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:pingup/Widgets/UserSearchPage.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:pingup/Widgets/index.dart';
+import 'package:pingup/Services/index.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -9,14 +11,18 @@ class MainPage extends StatefulWidget {
   State<MainPage> createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin {
-
+class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin{
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this, initialIndex: 0);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override

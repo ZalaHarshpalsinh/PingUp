@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:pingup/Widgets/index.dart';
+import 'package:pingup/Services/index.dart';
 
 void main() {
+  setupServiceLocator();
   runApp(PingUp());
 }
 

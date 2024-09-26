@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:pingup/Widgets/index.dart';
+import 'package:pingup/Services/index.dart';
 
 class PopupMenu extends StatefulWidget {
   const PopupMenu({super.key});
@@ -11,10 +12,12 @@ class PopupMenu extends StatefulWidget {
 
 class _PopupMenuState extends State<PopupMenu> {
 
-  final FlutterSecureStorage _storage = FlutterSecureStorage();
+  final FlutterSecureStorage _storage = getIt<FlutterSecureStorage>();
+  final webSocketService = getIt<WebSocketService>();
 
   Future<void> logout(BuildContext context) async
   {
+    webSocketService.dispose();
     await _storage.delete(key: 'jwt');
     Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (BuildContext context){

@@ -6,17 +6,23 @@ import 'package:pingup/Services/index.dart';
 class Auth extends StatelessWidget {
   Auth({super.key});
 
-  final MainService mainService = MainServiceImpl();
-  final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
+  final MainService mainService = getIt<MainService>();
+  final FlutterSecureStorage secureStorage = getIt<FlutterSecureStorage>();
+  final WebSocketService webSocketService = getIt<WebSocketService>();
 
-  Future<bool> authenticate() async {
+  Future<bool> authenticate() async
+  {
     String? jwt = await secureStorage.read(key: 'jwt');
     print("From auth: $jwt");
     if(jwt == null) return false;
 
-    Map<String, dynamic> response = await mainService.setStatusOnline(jwt);
-
-    return (response["success"] == true);
+     bool result = await webSocketService.initialize(jwt);
+     return result;
+    //  if(!result) return false;
+    //
+    // //Map<String, dynamic> response = await mainService.setStatusOnline(jwt);
+    //
+    // return (response["success"] == true);
   }
 
   @override
