@@ -21,11 +21,6 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
   }
 
   @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context)
   {
     return Scaffold(

@@ -13,8 +13,8 @@ class UserSearchPage extends StatefulWidget {
 
 class _UserSearchPageState extends State<UserSearchPage>
 {
-  final FlutterSecureStorage _storage = FlutterSecureStorage();
-  final MainService mainService = MainServiceImpl();
+  final FlutterSecureStorage _storage = getIt<FlutterSecureStorage>();
+  final MainService mainService = getIt<MainService>();
   final TextEditingController _searchController = TextEditingController();
   List<User> users = [];
   bool isLoading = true;
@@ -35,20 +35,19 @@ class _UserSearchPageState extends State<UserSearchPage>
 
   Future<void> _fetchUsers() async
   {
-    //print("Fetching users...");
+
     try {
       setState(() {
         isLoading = true;
       });
 
       final jwt = await _storage.read(key: 'jwt');
-      //print(_searchController.text);
+
       final response = await mainService.searchUsers(jwt!, _searchController.text);
 
       if (response['success'])
       {
         List<dynamic> data = response['data'];
-        print(data);
         setState(() {
           users = data.map((json) => User.fromJson(json)).toList();
           isLoading = false;
@@ -59,14 +58,12 @@ class _UserSearchPageState extends State<UserSearchPage>
       {
         setState(() {
           hasError = true;
-          print("error from server");
           isLoading = false;
         });
       }
     } catch (e) {
       setState(() {
         hasError = true;
-        //print(e);
         isLoading = false;
       });
     }
@@ -80,30 +77,32 @@ class _UserSearchPageState extends State<UserSearchPage>
       });
 
       final jwt = await _storage.read(key: 'jwt');
-      //print(_searchController.text);
+
       final response = await mainService.createChat(jwt!, user.id);
 
       if (response['success'])
       {
         Navigator.of(context).pop();
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context)=>
+            const MainPage()
+          )
+        );
       }
       else
       {
         setState(() {
           hasError = true;
-          //print("error from server");
           isLoading = false;
         });
       }
     } catch (e) {
       setState(() {
         hasError = true;
-        //print(e);
         isLoading = false;
       });
     }
   }
-
 
 
   @override

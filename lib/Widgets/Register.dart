@@ -11,7 +11,7 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  final MainService mainService = MainServiceImpl();
+  final MainService mainService = getIt<MainService>();
 
   final _formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();
@@ -67,7 +67,7 @@ class _RegisterPageState extends State<RegisterPage> {
       });
     }
     setState(() {
-      _isLoading = false; // Show spinner when request starts
+      _isLoading = false; // hide spinner when request ends
     });
   }
 

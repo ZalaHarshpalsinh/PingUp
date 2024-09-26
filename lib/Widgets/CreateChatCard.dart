@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
-import 'package:pingup/Services/index.dart';
 import 'package:pingup/models/index.dart';
 import 'package:pingup/Widgets/index.dart';
 
@@ -10,9 +7,6 @@ class CreateChatCard extends StatelessWidget
   User user;
   final Future<void> Function(User user) onCreateChat;
   CreateChatCard({super.key, required this.user, required this.onCreateChat});
-
-  final FlutterSecureStorage _storage = FlutterSecureStorage();
-  final MainService mainService = MainServiceImpl();
 
   void _showCreateChatDialog(BuildContext context, User user) {
     showDialog(

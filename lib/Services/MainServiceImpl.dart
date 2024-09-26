@@ -8,32 +8,6 @@ import 'dart:convert';
 class MainServiceImpl implements MainService {
 
   @override
-  Future<List<Map<String, dynamic>>> getChatList(String userId) async {
-    final response = await http.get(Uri.parse("$baseUrl/user/$userId/chats"));
-    if (response.statusCode == 200) {
-      return List<Map<String, dynamic>>.from(json.decode(response.body));
-    }
-    else {
-      print("Error: ${response.body}");
-      return json.decode("{}");
-    }
-  }
-
-  @override
-  Future<List<Map<String, dynamic>>> getMessages(String senderId,
-      String receiverId) async {
-    final response = await http.get(
-        Uri.parse("$baseUrl/messages/$senderId/$receiverId"));
-    if (response.statusCode == 200) {
-      return List<Map<String, dynamic>>.from(json.decode(response.body));
-    }
-    else {
-      print("Error: $response.body");
-      return json.decode("{}");
-    }
-  }
-
-  @override
   Future<Map<String, dynamic>> getUserDetails(String userId) async {
     final response = await http.get(Uri.parse("$baseUrl/user/$userId"));
     if (response.statusCode == 200) {
@@ -42,21 +16,6 @@ class MainServiceImpl implements MainService {
     else {
       print("Error: $response.body");
       return json.decode("{}");
-    }
-  }
-
-  @override
-  Future<void> sendMessage(String senderId, String receiverId, String message) async {
-    final response = await http.post(
-        Uri.parse("$baseUrl/message"),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'sender': senderId,
-          'receiver': receiverId,
-          'message': message,
-        }));
-    if (response.statusCode != 200) {
-      print("Error: $response.body");
     }
   }
 
@@ -150,5 +109,41 @@ class MainServiceImpl implements MainService {
           })
       );
       return json.decode(response.body);
+  }
+
+  @override
+  Future<Map<String, dynamic>> getChatList(String jwt) async {
+
+    final response = await http.get(Uri.parse("$baseUrl/chats"),
+        headers: { 'Authorization': 'Bearer $jwt'}
+    );
+    return json.decode(response.body);
+  }
+
+  @override
+  Future<Map<String, dynamic>> getMessages(String jwt, String chatId) async {
+    final response = await http.get(
+        Uri.parse("$baseUrl/chat/$chatId/messages"),
+        headers: { 'Authorization': 'Bearer $jwt'}
+    );
+
+    return json.decode(response.body);
+  }
+
+  @override
+  Future<Map<String, dynamic>> sendMessage(String jwt, String chatId, String message) async
+  {
+     final response = await http.post(
+       Uri.parse("$baseUrl/chat/$chatId/messages"),
+       headers: {
+         'Authorization': 'Bearer $jwt',
+         'Content-Type': 'application/json'
+       },
+       body: json.encode({
+         "messageText": message
+       })
+     );
+
+     return json.decode(response.body);
   }
 }

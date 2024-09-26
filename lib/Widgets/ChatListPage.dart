@@ -1,39 +1,80 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/material.dart';
-import '../Widgets/index.dart';
-import '../Services/index.dart';
-import '../global.dart';
+import 'package:pingup/Widgets/index.dart';
+import 'package:pingup/Services/index.dart';
+import 'package:pingup/global.dart';
+import 'package:pingup/models/index.dart';
 
-class ChatListPage extends StatelessWidget
+class ChatListPage extends StatefulWidget
 {
-  final MainService mainService = MainServiceImpl();
+  @override
+  State<ChatListPage> createState() => _ChatListPageState();
+}
+
+class _ChatListPageState extends State<ChatListPage> {
+  final FlutterSecureStorage _storage = getIt<FlutterSecureStorage>();
+  final MainService mainService = getIt<MainService>();
+
+  List<Chat> chats = [];
+  bool isLoading = true;
+  bool hasError = false;
+
+  Future<void> _fetchInitialChats() async
+  {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+
+      final jwt = await _storage.read(key: 'jwt');
+
+      final response = await mainService.getChatList(jwt!);
+
+      if (response['success'])
+      {
+        print(response['data']);
+        List<dynamic> data = response['data'];
+        setState(() {
+          chats = data.map((json) => Chat.fromJson(json)).toList();
+          isLoading = false;
+          hasError = false;
+        });
+      }
+      else
+      {
+        setState(() {
+          hasError = true;
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        print("Client error: ${e}");
+        hasError = true;
+        isLoading = false;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchInitialChats();
+  }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Chats'),
-      ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: mainService.getChatList(userId),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No chats available.'));
-          } else {
-            final chatList = snapshot.data!;
-            return ListView.builder(
-              itemCount: chatList.length,
-              itemBuilder: (context, index) {
-                final chat = chatList[index];
-                return ChatCard(friendId: chat['_id'], name: chat['name'], email: chat["email"], profilePhotoUrl: chat['profilePhotoUrl']);
-              },
-            );
-          }
-        },
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : hasError
+          ? const Center(child: Text('Failed to load chats.'))
+          : ListView.builder(
+          itemCount: chats.length,
+          itemBuilder: (context, index) {
+            Chat chat = chats[index];
+            return ChatCard(chat:chat);
+          },
       ),
     );
   }
