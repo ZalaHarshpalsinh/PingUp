@@ -13,8 +13,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final MainService mainService = MainServiceImpl();
-  final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
+  final MainService mainService = getIt<MainService>();
+  final FlutterSecureStorage secureStorage = getIt<FlutterSecureStorage>();
 
   final _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
@@ -22,7 +22,7 @@ class _LoginPageState extends State<LoginPage> {
   String? _errorMessage;
   bool _isLoading = false;
 
-  Future<void> _handleLogin() async {
+  Future<void> _handleLogin(BuildContext context) async {
     if(! _formKey.currentState!.validate() ) return;
 
     setState(() {
@@ -39,10 +39,12 @@ class _LoginPageState extends State<LoginPage> {
       await secureStorage.write(key: 'jwt', value: jwt);
       await secureStorage.write(key: 'userId', value: userId);
       //print(jwt);
-      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context){
+      if(context.mounted){
+        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context){
           return Auth();
         })
-      );
+        );
+      }
     }
     else
     {
@@ -54,7 +56,6 @@ class _LoginPageState extends State<LoginPage> {
       _isLoading = false; // Show spinner when request starts
     });
   }
-
 
   @override
   void dispose() {
@@ -179,7 +180,7 @@ class _LoginPageState extends State<LoginPage> {
                         const SizedBox(height: 20),
                         // Login Button
                         ElevatedButton(
-                          onPressed: _handleLogin,
+                          onPressed:()=>_handleLogin(context),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Theme.of(context).primaryColor, // WhatsApp green
                             shape: RoundedRectangleBorder(

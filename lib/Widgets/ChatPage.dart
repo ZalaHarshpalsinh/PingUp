@@ -1,44 +1,140 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:pingup/Services/index.dart';
-import '../global.dart';
+import 'package:pingup/models/index.dart';
 
 class ChatPage extends StatefulWidget
 {
-  final String personName;
-  final String personId;
-  final MainService mainService = MainServiceImpl();
-  ChatPage({super.key, required this.personId, required this.personName});
+  Chat chat;
+  User chatter;
+  ChatPage({super.key, required this.chat, required this.chatter});
 
   @override
   State<ChatPage> createState() => _TestChatPageState();
 }
 
-
-
 class _TestChatPageState extends State<ChatPage> {
-  List<Map<String, dynamic>> messages = [];
-
+  List<Message> messages = [];
+  final MainService mainService = getIt<MainService>();
+  final FlutterSecureStorage _secureStorage = getIt<FlutterSecureStorage>();
+  final WebSocketService webSocketService = getIt<WebSocketService>();
   final TextEditingController _controller = TextEditingController();
+
+  String? currentUserId;
+  bool isLoading = true;
+  bool hasError = false;
+
+  Future<void> _fetchCurrentUserId() async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+      final userId = await _secureStorage.read(key: 'userId');
+      setState(() {
+        currentUserId = userId;
+      });
+    } catch (e) {
+      setState(() {
+        //print("Client error: ${e}");
+        hasError = true;
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _fetchMessages() async {
+    print("\n\n\nFetching messages\n\n\n");
+    try {
+      setState(() {
+        isLoading = true;
+      });
+
+      final jwt = await _secureStorage.read(key: 'jwt');
+
+      final response = await mainService.getMessages(jwt!, widget.chat.id);
+      print(response);
+      if (response['success'])
+      {
+        print(response['data']);
+        List<dynamic> data = response['data'];
+        setState(() {
+          messages = data.map((json) => Message.fromJson(json)).toList();
+          isLoading = false;
+          hasError = false;
+        });
+      }
+      else
+      {
+        setState(() {
+          hasError = true;
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        print("Client error: ${e}");
+        hasError = true;
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _sendMessage() async {
+    if (_controller.text.isNotEmpty) {
+      try {
+        print("send message called");
+        final jwt = await _secureStorage.read(key: 'jwt');
+        final response = await mainService.sendMessage(jwt!, widget.chat.id, _controller.text.toString());
+        print(response);
+        if (!response['success']) {
+          setState(() {
+            hasError = true;
+            isLoading = false;
+          });
+        }
+        _controller.clear();
+      }
+      catch (e) {
+        setState(() {
+          print("Client error: ${e}");
+          hasError = true;
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _setupWebSocket() {
+    // Listen for 'Profile Update' event
+    webSocketService.socket!.on('Message sent', (data)
+    {
+      print("Receivede message sent event in chat page");
+      //_fetchMessages();
+      String chatId = data['chatId'];
+      Message newMessage = Message.fromJson(data['message']);
+      webSocketService.socket!.emit("Message Received", <String, dynamic>{
+        'messageId': newMessage.id,
+        'userId': currentUserId
+      });
+      if (chatId == widget.chat.id)
+      {
+        if(mounted)
+        {
+          setState(() {
+            widget.chat.lastMessage = newMessage;
+            messages.add(newMessage);
+          });
+        }
+      }
+    });
+  }
 
   @override
   void initState() {
     super.initState();
     _fetchMessages();
-  }
-
-  void _fetchMessages() async {
-    List<Map<String, dynamic>> fetchedMessages = await widget.mainService.getMessages(userId, widget.personId);
-    setState((){
-      messages = fetchedMessages;
-    });
-  }
-
-  void _sendMessage() async {
-    if (_controller.text.isNotEmpty) {
-      await widget.mainService.sendMessage(userId, widget.personId, _controller.text);
-      _fetchMessages();
-      _controller.clear();
-    }
+    _fetchCurrentUserId();
+    _setupWebSocket();
   }
 
   Widget _buildMessageBubble(String text, bool isSentByMe) {
@@ -62,9 +158,10 @@ class _TestChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    print(messages);
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.personName),
+        title: Text(widget.chatter.name),
       ),
       body: Column(
         children: [
@@ -75,8 +172,8 @@ class _TestChatPageState extends State<ChatPage> {
               itemBuilder: (context, index) {
                 final message = messages[messages.length - index - 1];
                 return _buildMessageBubble(
-                  message['message'],
-                  message['sender']==userId,
+                  message.message,
+                  message.senderId==currentUserId!,
                 );
               },
             ),
